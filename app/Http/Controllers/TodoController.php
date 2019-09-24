@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Todo;
 
 class TodoController extends Controller
@@ -26,13 +27,25 @@ class TodoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        $todo = Todo::create([
-            'name' => $request->name,
-            'date' => $request->date,
+    {      
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'date' => 'required|date_format:Y-m-d',
         ]);
 
-        return $todo;
+        if ($validator->fails()) 
+        {
+            return response()->json(['errors' => $validator->errors()], 422);
+        
+        }else{
+
+            $todo = Todo::create([
+                'name' => $request->name,
+                'date' => $request->date,
+            ]);
+
+            return $todo;
+        }
     }
 
     /**
@@ -57,12 +70,24 @@ class TodoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $todo = Todo::find($id);
-        $todo->name = $request->name;
-        $todo->date = $request->date;
-        $todo->save();
-        
-        return $todo;
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'date' => 'required|date_format:Y-m-d',
+        ]);
+
+        if ($validator->fails()) 
+        {
+            return response()->json(['errors' => $validator->errors()], 422);
+   
+        }else{
+
+            $todo = Todo::find($id);
+            $todo->name = $request->name;
+            $todo->date = $request->date;
+            $todo->save();
+
+            return $todo;
+        }
     }
 
     /**
